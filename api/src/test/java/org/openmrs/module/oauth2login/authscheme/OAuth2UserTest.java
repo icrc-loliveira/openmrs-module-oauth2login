@@ -23,10 +23,10 @@ public class OAuth2UserTest {
 	public void getRoleNames_shouldParseAndTrimRoleNamesWhenMappingIsDefined() {
 		// setup
 		oauth2Props.setProperty(OAuth2User.MAPPINGS_PFX + OAuth2User.PROP_ROLES, "roles");
-		oauth2User = new OAuth2User("jdoe@example.com", "{\"roles\":\"nurse, doctor\"}");
+		oauth2User = new OAuth2User("{\"roles\":\"nurse, doctor\"}", oauth2Props);
 		
 		// replay
-		List<String> roleNames = oauth2User.getRoleNames(oauth2Props);
+		List<String> roleNames = oauth2User.getRoleNames();
 		
 		// verify
 		Assert.assertThat(roleNames, hasSize(2));
@@ -37,10 +37,10 @@ public class OAuth2UserTest {
 	public void getRoleNames_shouldParseToEmptyRoleNamesWhenMappingIsNotDefined() {
 		// setup
 		oauth2Props = new Properties();
-		oauth2User = new OAuth2User("jdoe@example.com", "{\"roles\":\"nurse, doctor\"}");
+		oauth2User = new OAuth2User("{\"roles\":\"nurse, doctor\"}", oauth2Props);
 		
 		// replay
-		List<String> roleNames = oauth2User.getRoleNames(oauth2Props);
+		List<String> roleNames = oauth2User.getRoleNames();
 		
 		// verify
 		Assert.assertThat(roleNames, empty());

@@ -55,11 +55,11 @@ public class UsernameAuthenticationScheme extends DaoAuthenticationScheme {
 		
 		if (user == null) {
 			
-			user = creds.getOAuth2User().toOpenmrsUser(oauth2Props);
+			user = creds.getOAuth2User().toOpenmrsUser();
 			
 			try {
 				user = getContextDAO().createUser(user, RandomStringUtils.random(100, true, true),
-				    creds.getOAuth2User().getRoleNames(oauth2Props));
+				    creds.getOAuth2User().getRoleNames());
 			}
 			catch (Exception e) {
 				throw new ContextAuthenticationException(

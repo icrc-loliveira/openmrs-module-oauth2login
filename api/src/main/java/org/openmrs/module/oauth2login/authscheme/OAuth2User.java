@@ -45,17 +45,17 @@ public class OAuth2User {
 	
 	public static final String PROP_ROLES = "user.roles";
 	
-	private String openmrsUsername;
+	private Properties properties;
 	
 	private String userInfoJson; // user info as obtained from the OAuth 2 provider
 	
 	/**
-	 * @param openmrsUsername The String that is meant to be the unique OpenMRS username.
+	 * @param properties The Properties for mapping the Oauth 2 provider.
 	 * @param userInfoJson The OAuth 2 user info response JSON.
 	 */
-	public OAuth2User(String openmrsUsername, String userInfoJson) {
-		this.openmrsUsername = openmrsUsername;
+	public OAuth2User(String userInfoJson, Properties properties) {
 		this.userInfoJson = userInfoJson;
+		this.properties = properties;
 	}
 	
 	@Override
@@ -64,29 +64,27 @@ public class OAuth2User {
 	}
 	
 	public String getOpenmrsUsername() {
-		return openmrsUsername;
+		return OAuth2User.get(userInfoJson, OAuth2User.MAPPINGS_PFX + OAuth2User.PROP_USERNAME, properties);
 	}
 	
 	/**
 	 * Converts the OAUth user info into an OpenMRS user based on the OAuth 2 properties mappings.
 	 * 
-	 * @param props The mappings between the user info fields and the corresponding OpenMRS
-	 *            user/person properties.
 	 * @return The OpenMRS {@link User}
 	 */
-	public User toOpenmrsUser(Properties props) {
+	public User toOpenmrsUser() {
 		
 		User user = new User();
 		user.setUsername(getOpenmrsUsername());
-		user.setSystemId(get(userInfoJson, MAPPINGS_PFX + PROP_SYSTEMID, props));
-		user.setEmail(get(userInfoJson, MAPPINGS_PFX + PROP_EMAIL, props, null));
+		user.setSystemId(get(userInfoJson, MAPPINGS_PFX + PROP_SYSTEMID, properties));
+		user.setEmail(get(userInfoJson, MAPPINGS_PFX + PROP_EMAIL, properties, null));
 		
 		Person person = new Person();
-		person.setGender(get(userInfoJson, MAPPINGS_PFX + PROP_GENDER, props, "n/a"));
+		person.setGender(get(userInfoJson, MAPPINGS_PFX + PROP_GENDER, properties, "n/a"));
 		PersonName name = new PersonName();
-		name.setGivenName(get(userInfoJson, MAPPINGS_PFX + PROP_GIVEN_NAME, props));
-		name.setMiddleName(get(userInfoJson, MAPPINGS_PFX + PROP_MIDDLE_NAME, props));
-		name.setFamilyName(get(userInfoJson, MAPPINGS_PFX + PROP_FAMILY_NAME, props));
+		name.setGivenName(get(userInfoJson, MAPPINGS_PFX + PROP_GIVEN_NAME, properties));
+		name.setMiddleName(get(userInfoJson, MAPPINGS_PFX + PROP_MIDDLE_NAME, properties));
+		name.setFamilyName(get(userInfoJson, MAPPINGS_PFX + PROP_FAMILY_NAME, properties));
 		
 		user.setPerson(person);
 		user.addName(name);
@@ -121,13 +119,11 @@ public class OAuth2User {
 	 * Convenience method that retrieves the list of role names from the corresponding custom OAuth
 	 * 2 property CSV value.
 	 * 
-	 * @param props The mappings between the user info fields and the corresponding OpenMRS
-	 *            user/person properties.
 	 * @return The list of role names, eg. ["Nurse", "Anaesthesia Assistant"].
 	 */
-
-	public List<String> getRoleNames(Properties props) {
-		String roleNames = get(userInfoJson, MAPPINGS_PFX + PROP_ROLES, props, "");
+	
+	public List<String> getRoleNames() {
+		String roleNames = get(userInfoJson, MAPPINGS_PFX + PROP_ROLES, properties, "");
 		return Stream.of(roleNames.split(","))
 				.filter(n -> StringUtils.isNoneBlank(n))
 				.map(n -> StringUtils.trim(n))
